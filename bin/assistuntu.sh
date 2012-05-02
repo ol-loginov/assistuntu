@@ -1,3 +1,4 @@
 #!/bin/bash
 
-java -jar assistuntu-1.0.jar
+echo running `dirname $0`/assistuntu-1.0.jar
+java -jar `dirname $0`/assistuntu-1.0.jar
