@@ -1,0 +1,131 @@
+package assistuntu;
+
+import assistuntu.model.AnswerRow;
+import assistuntu.model.ComplectRow;
+import assistuntu.model.QuestRow;
+import assistuntu.view.Complect;
+import assistuntu.view.EngineListener;
+import assistuntu.view.MainFormController;
+import assistuntu.view.Question;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+public class Engine implements MainFormController {
+    private final Random random = new Random(System.currentTimeMillis());
+
+    private Repository repository = new Repository();
+    private ArrayList<Complect> complectList = new ArrayList<Complect>();
+
+    private EngineListener listener;
+    private Question question = null;
+    private ArrayList<Question> questionList = new ArrayList<Question>();
+    private ArrayList<Question> questionLine = new ArrayList<Question>();
+
+    public void load() {
+        try {
+            repository.loadFromResources();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for (ComplectRow row : repository.getComplectList()) {
+            Complect complect = new Complect();
+            complect.setId(row.getId());
+            complect.setName(row.getName());
+            complect.setDescription(row.getDescription());
+            complect.setSelected(false);
+            complectList.add(complect);
+        }
+    }
+
+    public void setListener(EngineListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public List<Complect> getComplectList() {
+        return complectList;
+    }
+
+    @Override
+    public void complectListChanged() {
+        List<Integer> complectIdList = new ArrayList<Integer>();
+        for (Complect complect : complectList) {
+            if (complect.isSelected()) {
+                complectIdList.add(complect.getId());
+            }
+        }
+
+        List<QuestRow> questInput = repository.selectQuestList(complectIdList);
+        Collections.shuffle(questionList);
+
+        questionList.clear();
+        for (QuestRow quest : questInput) {
+            Question question = new Question();
+            question.setIndex(questionList.size());
+            question.setQuest(quest.getId());
+            question.setComplect(quest.getComplect());
+            questionList.add(question);
+        }
+        refillQueue();
+    }
+
+    private void refillQueue() {
+        questionLine.clear();
+        questionLine.addAll(questionList);
+    }
+
+    @Override
+    public Question nextQuestion() {
+        if (questionLine.isEmpty()) {
+            listener.completeReport(0, 0);
+            refillQueue();
+        }
+        question = questionLine.remove(0);
+        loadQuestion(question);
+        listener.questionTaken(question);
+        return question;
+    }
+
+    private void loadQuestion(Question question) {
+        if (question == null || question.isLoaded()) {
+            return;
+        }
+        QuestRow questRow = repository.getQuest(question.getQuest());
+        question.setText(questRow.getQuestionText());
+        for (AnswerRow answer : repository.selectAnswerList(questRow)) {
+            question.addAnswer(answer.getAnswer(), answer.isCorrect());
+        }
+        question.setPicture(repository.getPicture(questRow));
+        question.setLoaded(true);
+    }
+
+    @Override
+    public void setCurrentQuestionAnswer(boolean correct) {
+        if (correct) {
+            question.setCorrectCount(question.getCorrectCount() + 1);
+        } else {
+            question.setFailCount(question.getFailCount() + 1);
+
+            if (questionLine.size() < 20) {
+                questionLine.add(question);
+            } else {
+                questionLine.add(10 + random.nextInt(10), question);
+            }
+        }
+    }
+
+    @Override
+    public Question currentQuestion() {
+        return question;
+    }
+
+    @Override
+    public int getQuestionLineSize() {
+        return questionLine.size();
+    }
+}
