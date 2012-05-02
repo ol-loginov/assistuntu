@@ -15,11 +15,19 @@ public class DataTable<K, V> {
         rows.clear();
     }
 
+    public Collection<K> keys() {
+        return rows.keySet();
+    }
+
     public Collection<V> values() {
         return rows.values();
     }
 
     public V get(K id) {
         return rows.get(id);
+    }
+
+    public void remove(K k) {
+        rows.remove(k);
     }
 }

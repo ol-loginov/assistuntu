@@ -1,12 +1,18 @@
 package assistuntu.view;
 
+import assistuntu.model.QuestRow;
+
 import java.awt.image.BufferedImage;
 
 public class Question {
     private int index;
     private boolean loaded;
-    private int quest;
-    private int complect;
+
+    private final int id;
+
+    private final int complect;
+    private final int bilet;
+    private final int vopros;
 
     private String text;
     private String answer;
@@ -18,6 +24,13 @@ public class Question {
     private int failCount;
     private int correctCount;
 
+    public Question(QuestRow questionRow) {
+        this.id = questionRow.getId();
+        this.complect = questionRow.getComplect();
+        this.bilet = questionRow.getBilet();
+        this.vopros = questionRow.getQuestion();
+    }
+
     public boolean isLoaded() {
         return loaded;
     }
@@ -26,20 +39,12 @@ public class Question {
         this.loaded = loaded;
     }
 
-    public int getQuest() {
-        return quest;
-    }
-
-    public void setQuest(int quest) {
-        this.quest = quest;
+    public int getId() {
+        return id;
     }
 
     public int getComplect() {
         return complect;
-    }
-
-    public void setComplect(int complect) {
-        this.complect = complect;
     }
 
     public String getText() {
@@ -108,5 +113,13 @@ public class Question {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public int getBilet() {
+        return bilet;
+    }
+
+    public int getVopros() {
+        return vopros;
     }
 }

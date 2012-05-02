@@ -3,6 +3,7 @@ package assistuntu;
 import assistuntu.model.AnswerRow;
 import assistuntu.model.ComplectRow;
 import assistuntu.model.QuestRow;
+import assistuntu.model.SettingRow;
 import assistuntu.view.Complect;
 import assistuntu.view.EngineListener;
 import assistuntu.view.MainFormController;
@@ -32,14 +33,23 @@ public class Engine implements MainFormController {
             e.printStackTrace();
         }
 
+        List<Integer> activeComplect = new ArrayList<Integer>();
+        for (SettingRow row : repository.getUserSettings().values()) {
+            if (row.getId().startsWith("active.complect.")) {
+                activeComplect.add(Integer.parseInt(row.getValue()));
+            }
+        }
+
         for (ComplectRow row : repository.getComplectList()) {
             Complect complect = new Complect();
             complect.setId(row.getId());
             complect.setName(row.getName());
             complect.setDescription(row.getDescription());
-            complect.setSelected(false);
+            complect.setSelected(activeComplect.contains(row.getId()));
             complectList.add(complect);
         }
+
+        updateComplectSet();
     }
 
     public void setListener(EngineListener listener) {
@@ -48,16 +58,38 @@ public class Engine implements MainFormController {
 
     @Override
     public List<Complect> getComplectList() {
-        return complectList;
+        return Collections.unmodifiableList(complectList);
     }
 
     @Override
-    public void complectListChanged() {
+    public List<Question> getQuestionList() {
+        return Collections.unmodifiableList(questionList);
+    }
+
+    @Override
+    public void updateComplectSet() {
+        for (String setting : repository.getUserSettings().keys().toArray(new String[0])) {
+            if (setting.startsWith("active.complect.")) {
+                repository.getUserSettings().remove(setting);
+            }
+        }
+
         List<Integer> complectIdList = new ArrayList<Integer>();
         for (Complect complect : complectList) {
             if (complect.isSelected()) {
                 complectIdList.add(complect.getId());
+
+                SettingRow row = new SettingRow();
+                row.setId("active.complect." + complect.getId());
+                row.setValue(Integer.toString(complect.getId()));
+                repository.getUserSettings().put(row.getId(), row);
             }
+        }
+
+        try {
+            repository.saveUserSettings();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         List<QuestRow> questInput = repository.selectQuestList(complectIdList);
@@ -65,13 +97,13 @@ public class Engine implements MainFormController {
 
         questionList.clear();
         for (QuestRow quest : questInput) {
-            Question question = new Question();
+            Question question = new Question(quest);
             question.setIndex(questionList.size());
-            question.setQuest(quest.getId());
-            question.setComplect(quest.getComplect());
             questionList.add(question);
         }
         refillQueue();
+
+        listener.afterQuestionSetSelected();
     }
 
     private void refillQueue() {
@@ -95,7 +127,7 @@ public class Engine implements MainFormController {
         if (question == null || question.isLoaded()) {
             return;
         }
-        QuestRow questRow = repository.getQuest(question.getQuest());
+        QuestRow questRow = repository.getQuest(question.getId());
         question.setText(questRow.getQuestionText());
         for (AnswerRow answer : repository.selectAnswerList(questRow)) {
             question.addAnswer(answer.getAnswer(), answer.isCorrect());
@@ -125,7 +157,7 @@ public class Engine implements MainFormController {
     }
 
     @Override
-    public int getQuestionLineSize() {
-        return questionLine.size();
+    public int getQuestionListSize() {
+        return questionList.size();
     }
 }

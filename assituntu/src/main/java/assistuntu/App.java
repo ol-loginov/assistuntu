@@ -10,8 +10,8 @@ public class App {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            // no i 4ert s nim
+        } catch (Exception e2) {
+            // nu i 4ert s nim
         }
         new App().run();
     }
@@ -27,7 +27,7 @@ public class App {
         frame.pack();
         frame.setVisible(true);
 
-        engine.load();
         engine.setListener(frame);
+        engine.load();
     }
 }

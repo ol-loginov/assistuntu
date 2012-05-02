@@ -22,7 +22,7 @@ public class Repository {
     private final DataTable<Integer, AnswerRow> answerTable = new DataTable<Integer, AnswerRow>();
     private final DataTable<Integer, ComplectRow> complectTable = new DataTable<Integer, ComplectRow>();
     private final DataTable<Integer, QuestRow> questTable = new DataTable<Integer, QuestRow>();
-    private final DataTable<Integer, StatusRow> statusTable = new DataTable<Integer, StatusRow>();
+    private final DataTable<String, SettingRow> userSettings = new DataTable<String, SettingRow>();
 
     public Repository() {
     }
@@ -91,10 +91,13 @@ public class Repository {
             }
         });
 
-        statusTable.clear();
-        loadTable(openUserFile("status.csv"), new HtmlTableLoader() {
+        userSettings.clear();
+        loadTable(openUserFile("settings.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
+                SettingRow row = new SettingRow();
+                row.parseCsv(textList);
+                userSettings.put(row.getId(), row);
             }
         });
     }
@@ -103,12 +106,16 @@ public class Repository {
         return Repository.class.getClassLoader().getResourceAsStream(name);
     }
 
-    private InputStream openUserFile(String name) {
+    private File getUserFile(String name) {
         File userHome = new File(System.getProperty("user.home"));
         File repositoryHome = new File(userHome, ".assistuntu");
-        File file = new File(repositoryHome, name);
+        repositoryHome.mkdirs();
+        return new File(repositoryHome, name);
+    }
+
+    private InputStream openUserFile(String name) {
         try {
-            return new FileInputStream(file);
+            return new FileInputStream(getUserFile(name));
         } catch (FileNotFoundException e) {
             return null;
         }
@@ -159,6 +166,31 @@ public class Repository {
             return ImageIO.read(pictureStream);
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public DataTable<String, SettingRow> getUserSettings() {
+        return userSettings;
+    }
+
+    public void saveUserSettings() throws IOException {
+        File file = getUserFile("settings.csv");
+        if (!file.exists()) {
+            if (!file.createNewFile()) {
+                throw new IOException("cannot create settings file");
+            }
+        }
+
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file));
+        try {
+            BufferedWriter out = new BufferedWriter(writer);
+            for (SettingRow row : this.userSettings.values()) {
+                out.write(row.toCSV());
+                out.newLine();
+            }
+            out.flush();
+        } finally {
+            writer.close();
         }
     }
 }

@@ -60,19 +60,16 @@ public class MainForm extends JFrame implements EngineListener {
 
     private void selectComplect() {
         ComplectSelector.show(this, controller.getComplectList());
-        controller.complectListChanged();
+        controller.updateComplectSet();
+    }
 
-        int questionLineSize = controller.getQuestionLineSize();
+    @Override
+    public void afterQuestionSetSelected() {
         questionLine.removeAll();
-        for (int i = 0; i < questionLineSize; ++i) {
-            JLabel label = new JLabel();
-            label.setText(Integer.toString(i + 1));
-            label.setOpaque(true);
-            setStatusQuestionLabelColor(label, label.getBackground());
-            questionLine.add(label);
+        for (Question question : controller.getQuestionList()) {
+            questionLine.add(new QuestionLabel(question));
         }
         questionLinePane.getViewport().setViewSize(questionLine.getPreferredSize());
-
         takeNextQuestion();
     }
 
@@ -111,13 +108,15 @@ public class MainForm extends JFrame implements EngineListener {
     }
 
     private void passAnswer(JTextPane source) {
+        Question question = controller.currentQuestion();
+        QuestionLabel label = getQuestionStatusLabel(question);
         String answer = source.getText();
-        boolean correct = answer.equals(controller.currentQuestion().getAnswer());
+        boolean correct = answer.equals(question.getAnswer());
         boolean firstTry = Color.WHITE.equals(source.getBackground());
 
         if (firstTry) {
             controller.setCurrentQuestionAnswer(correct);
-            setStatusQuestionLabelColor(controller.currentQuestion().getIndex(), correct ? Color.GREEN : Color.RED);
+            label.setState(correct ? QuestionLabelState.PASSED : QuestionLabelState.FAILED);
         }
 
         if (correct) {
@@ -140,19 +139,60 @@ public class MainForm extends JFrame implements EngineListener {
 
     @Override
     public void questionTaken(Question question) {
-        int questionLineSize = controller.getQuestionLineSize();
-        questionStatus.setText(String.format("%d из %d", question.getIndex() + 1, questionLineSize));
-        JLabel label = (JLabel) questionLine.getComponent(question.getIndex());
-        setStatusQuestionLabelColor(label, Color.YELLOW);
+        int questionListSize = controller.getQuestionListSize();
+        questionStatus.setText(String.format("%d из %d", question.getIndex() + 1, questionListSize));
+        QuestionLabel label = getQuestionStatusLabel(question);
+        label.setState(QuestionLabelState.SELECTED);
         label.scrollRectToVisible(label.getVisibleRect());
     }
 
-    private void setStatusQuestionLabelColor(int index, Color color) {
-        setStatusQuestionLabelColor((JLabel) questionLine.getComponent(index), color);
+    private QuestionLabel getQuestionStatusLabel(Question question) {
+        for (Component component : questionLine.getComponents()) {
+            QuestionLabel label = (QuestionLabel) component;
+            if (label.getId() == question.getId()) {
+                return label;
+            }
+        }
+        throw new IllegalStateException("label not found");
     }
 
-    private void setStatusQuestionLabelColor(JLabel label, Color color) {
-        label.setBackground(color);
-        label.setBorder(BorderFactory.createLineBorder(color, 3));
+    public static enum QuestionLabelState {
+        SELECTED,
+        FAILED,
+        PASSED
+    }
+
+    public static class QuestionLabel extends JLabel {
+        private final int id;
+
+        public QuestionLabel(Question q) {
+            this.id = q.getId();
+            setText(String.format("%d:%d:%d", q.getComplect(), q.getBilet(), q.getVopros()));
+            setOpaque(true);
+            changeBackground(getBackground());
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setState(QuestionLabelState state) {
+            switch (state) {
+                case SELECTED:
+                    changeBackground(Color.YELLOW);
+                    break;
+                case FAILED:
+                    changeBackground(Color.RED);
+                    break;
+                case PASSED:
+                    changeBackground(Color.GREEN);
+                    break;
+            }
+        }
+
+        public void changeBackground(Color color) {
+            setBackground(color);
+            setBorder(BorderFactory.createLineBorder(color, 3));
+        }
     }
 }

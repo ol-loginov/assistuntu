@@ -5,7 +5,9 @@ import java.util.List;
 public interface MainFormController {
     List<Complect> getComplectList();
 
-    int getQuestionLineSize();
+    int getQuestionListSize();
+
+    List<Question> getQuestionList();
 
     Question nextQuestion();
 
@@ -13,5 +15,5 @@ public interface MainFormController {
 
     void setCurrentQuestionAnswer(boolean correct);
 
-    void complectListChanged();
+    void updateComplectSet();
 }
