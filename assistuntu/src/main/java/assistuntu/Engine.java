@@ -112,15 +112,15 @@ public class Engine implements MainFormController {
     }
 
     @Override
-    public Question nextQuestion() {
+    public void nextQuestion() {
         if (questionLine.isEmpty()) {
             listener.completeReport(0, 0);
             refillQueue();
         }
+
         question = questionLine.remove(0);
         loadQuestion(question);
         listener.questionTaken(question);
-        return question;
     }
 
     private void loadQuestion(Question question) {

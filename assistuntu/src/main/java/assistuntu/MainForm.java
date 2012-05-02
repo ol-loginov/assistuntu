@@ -28,6 +28,7 @@ public class MainForm extends JFrame implements EngineListener {
     private JLabel questionStatus;
     private JPanel questionLine;
     private JScrollPane questionLinePane;
+    private JButton btnShowAnswer;
 
     private final MainFormController controller;
     private final List<JTextPane> answerButtons = new ArrayList<JTextPane>();
@@ -45,6 +46,12 @@ public class MainForm extends JFrame implements EngineListener {
                 selectComplect();
             }
         });
+        btnShowAnswer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                highlightAction();
+            }
+        });
 
         MouseInputAdapter answerButtonListener = new MouseInputAdapter() {
             @Override
@@ -53,8 +60,8 @@ public class MainForm extends JFrame implements EngineListener {
             }
         };
         for (JTextPane answerButton : answerButtons) {
+            answerButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             answerButton.addMouseListener(answerButtonListener);
-            answerButton.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         }
     }
 
@@ -70,11 +77,10 @@ public class MainForm extends JFrame implements EngineListener {
             questionLine.add(new QuestionLabel(question));
         }
         questionLinePane.getViewport().setViewSize(questionLine.getPreferredSize());
-        takeNextQuestion();
+        controller.nextQuestion();
     }
 
-    public void takeNextQuestion() {
-        Question question = controller.nextQuestion();
+    private void showQuestion(Question question) {
         if (question == null) {
             questionPanel.setVisible(false);
             return;
@@ -103,7 +109,16 @@ public class MainForm extends JFrame implements EngineListener {
             JTextPane button = buttons.pop();
             button.setText(answer);
             button.setVisible(true);
-            button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            button.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        }
+    }
+
+    private void highlightAction() {
+        Question question = controller.currentQuestion();
+        for (JTextPane pane : answerButtons) {
+            if (pane.getText().equals(question.getAnswer())) {
+                pane.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+            }
         }
     }
 
@@ -120,7 +135,7 @@ public class MainForm extends JFrame implements EngineListener {
         }
 
         if (correct) {
-            takeNextQuestion();
+            controller.nextQuestion();
         } else {
             source.setBackground(Color.RED);
 
@@ -139,6 +154,8 @@ public class MainForm extends JFrame implements EngineListener {
 
     @Override
     public void questionTaken(Question question) {
+        showQuestion(question);
+
         int questionListSize = controller.getQuestionListSize();
         questionStatus.setText(String.format("%d из %d", question.getIndex() + 1, questionListSize));
         QuestionLabel label = getQuestionStatusLabel(question);

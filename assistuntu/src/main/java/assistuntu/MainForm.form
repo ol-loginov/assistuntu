@@ -18,7 +18,13 @@
           <component id="afd3" class="javax.swing.JButton" binding="btnSelectComplect">
             <constraints/>
             <properties>
-              <text value="Complects ..."/>
+              <text value="Комплекты ..."/>
+            </properties>
+          </component>
+          <component id="87da1" class="javax.swing.JButton" binding="btnShowAnswer">
+            <constraints/>
+            <properties>
+              <text value="Показать ответ"/>
             </properties>
           </component>
         </children>

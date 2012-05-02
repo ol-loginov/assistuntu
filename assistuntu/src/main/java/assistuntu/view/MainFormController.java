@@ -9,7 +9,7 @@ public interface MainFormController {
 
     List<Question> getQuestionList();
 
-    Question nextQuestion();
+    void nextQuestion();
 
     Question currentQuestion();
 
