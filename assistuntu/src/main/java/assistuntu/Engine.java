@@ -93,7 +93,7 @@ public class Engine implements MainFormController {
         }
 
         List<QuestRow> questInput = repository.selectQuestList(complectIdList);
-        Collections.shuffle(questionList);
+        Collections.shuffle(questInput);
 
         questionList.clear();
         for (QuestRow quest : questInput) {
