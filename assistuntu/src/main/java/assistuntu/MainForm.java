@@ -3,6 +3,7 @@ package assistuntu;
 import assistuntu.view.EngineListener;
 import assistuntu.view.MainFormController;
 import assistuntu.view.Question;
+import assistuntu.view.UserComplect;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
@@ -66,8 +67,10 @@ public class MainForm extends JFrame implements EngineListener {
     }
 
     private void selectComplect() {
-        ComplectSelector.show(this, controller.getComplectList());
-        controller.updateComplectSet();
+        UserComplect complect = controller.getUserComplect().deepCopy();
+        if (ComplectSelector.show(this, complect)) {
+            controller.setUserComplect(complect);
+        }
     }
 
     @Override

@@ -1,9 +1,8 @@
 package assistuntu.view;
 
-public class Complect {
+public class Theme {
     private int id;
     private String name;
-    private String description;
     private boolean selected;
 
     public int getId() {
@@ -22,14 +21,6 @@ public class Complect {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public boolean isSelected() {
         return selected;
     }
@@ -38,12 +29,11 @@ public class Complect {
         this.selected = selected;
     }
 
-    public Complect deepCopy() {
-        Complect other = new Complect();
+    public Theme deepCopy() {
+        Theme other = new Theme();
         other.id = id;
-        other.selected = selected;
         other.name = name;
-        other.description = description;
+        other.selected = selected;
         return other;
     }
 }

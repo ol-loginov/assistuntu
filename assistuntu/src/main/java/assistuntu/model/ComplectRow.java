@@ -1,6 +1,6 @@
 package assistuntu.model;
 
-public class ComplectRow {
+public class ComplectRow implements Identible<Integer> {
     private int id;
     private String name;
     private String description;
@@ -8,7 +8,17 @@ public class ComplectRow {
     private int questionTime;
     private int passMark;
 
-    public int getId() {
+    public ComplectRow(String[] csvRow) {
+        setDescription(csvRow[0]);
+        setId(Integer.parseInt(csvRow[1]));
+        setQuestionCount(Integer.parseInt(csvRow[2]));
+        setPassMark(Integer.parseInt(csvRow[3]));
+        setName(csvRow[4]);
+        setQuestionTime(Integer.parseInt(csvRow[5]));
+    }
+
+    @Override
+    public Integer getId() {
         return id;
     }
 

@@ -1,12 +1,24 @@
 package assistuntu.model;
 
-public class AnswerRow {
+public class AnswerRow implements Identible<Integer> {
     private int id;
     private int quest;
     private String answer;
     private boolean correct;
 
-    public int getId() {
+    public AnswerRow(int id) {
+        this.id = id;
+    }
+
+    public AnswerRow(String[] csvRow) {
+        id = Integer.parseInt(csvRow[0]);
+        quest = Integer.parseInt(csvRow[1]);
+        answer = csvRow[2];
+        correct = "1".equals(csvRow[3]);
+    }
+
+    @Override
+    public Integer getId() {
         return id;
     }
 

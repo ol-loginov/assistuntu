@@ -1,49 +1,44 @@
 package assistuntu.model;
 
-public class QuestRow {
+public class QuestRow implements Identible<Integer> {
     private int id;
+    private int theme;
     private int complect;
     private int bilet;
     private int question;
     private String questionText;
 
-    public int getId() {
-        return id;
+    public QuestRow(String[] csvRow) {
+        complect = Integer.parseInt(csvRow[0]);
+        theme = Integer.parseInt(csvRow[1]);
+        id = Integer.parseInt(csvRow[2]);
+        bilet = Integer.parseInt(csvRow[3]);
+        question = Integer.parseInt(csvRow[4]);
+        questionText = csvRow[5];
     }
 
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public Integer getId() {
+        return id;
     }
 
     public int getComplect() {
         return complect;
     }
 
-    public void setComplect(int complect) {
-        this.complect = complect;
-    }
-
     public int getBilet() {
         return bilet;
-    }
-
-    public void setBilet(int bilet) {
-        this.bilet = bilet;
     }
 
     public int getQuestion() {
         return question;
     }
 
-    public void setQuestion(int question) {
-        this.question = question;
-    }
-
     public String getQuestionText() {
         return questionText;
     }
 
-    public void setQuestionText(String questionText) {
-        this.questionText = questionText;
+    public int getTheme() {
+        return theme;
     }
 }

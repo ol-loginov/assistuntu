@@ -3,7 +3,9 @@ package assistuntu.view;
 import java.util.List;
 
 public interface MainFormController {
-    List<Complect> getComplectList();
+    UserComplect getUserComplect();
+
+    void setUserComplect(UserComplect complect);
 
     int getQuestionListSize();
 
@@ -14,6 +16,4 @@ public interface MainFormController {
     Question currentQuestion();
 
     void setCurrentQuestionAnswer(boolean correct);
-
-    void updateComplectSet();
 }

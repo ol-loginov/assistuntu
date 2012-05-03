@@ -4,11 +4,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DataTable<K, V> {
+public class DataTable<K, V extends Identible<K>> {
     private Map<K, V> rows = new HashMap<K, V>();
 
-    public void put(K id, V row) {
-        rows.put(id, row);
+
+    public void put(V row) {
+        rows.put(row.getId(), row);
     }
 
     public void clear() {

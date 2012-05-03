@@ -1,15 +1,21 @@
 package assistuntu.model;
 
-public class SettingRow {
+public class SettingRow implements Identible<String> {
     private String id;
     private String value;
 
-    public String getId() {
-        return id;
+    public SettingRow(String id) {
+        this.id = id;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public SettingRow(String[] csvRow) {
+        id = csvRow[0];
+        value = csvRow[1];
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     public String getValue() {
@@ -22,10 +28,5 @@ public class SettingRow {
 
     public String toCSV() {
         return id + ";" + value;
-    }
-
-    public void parseCsv(String[] textList) {
-        setId(textList[0]);
-        setValue(textList[1]);
     }
 }

@@ -22,6 +22,7 @@ public class Repository {
     private final DataTable<Integer, AnswerRow> answerTable = new DataTable<Integer, AnswerRow>();
     private final DataTable<Integer, ComplectRow> complectTable = new DataTable<Integer, ComplectRow>();
     private final DataTable<Integer, QuestRow> questTable = new DataTable<Integer, QuestRow>();
+    private final DataTable<Integer, ThemeRow> themeTable = new DataTable<Integer, ThemeRow>();
     private final DataTable<String, SettingRow> userSettings = new DataTable<String, SettingRow>();
 
     public Repository() {
@@ -41,24 +42,19 @@ public class Repository {
         loadTable(openLocalResource("db/answers.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
-                AnswerRow row = new AnswerRow();
-                row.setId(Integer.parseInt(textList[0]));
-                row.setQuest(Integer.parseInt(textList[1]));
-                row.setAnswer(textList[2]);
-                row.setCorrect("1".equals(textList[3]));
-                answerTable.put(row.getId(), row);
+                AnswerRow row = new AnswerRow(textList);
+                answerTable.put(row);
                 nextAnswerId.val = Math.max(nextAnswerId.val, row.getId());
             }
         });
         loadTable(openLocalResource("db/new_table.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
-                AnswerRow row = new AnswerRow();
-                row.setId(++nextAnswerId.val);
+                AnswerRow row = new AnswerRow(++nextAnswerId.val);
                 row.setQuest(Integer.parseInt(textList[1]));
                 row.setAnswer(textList[2]);
                 row.setCorrect("1".equals(textList[3]));
-                answerTable.put(row.getId(), row);
+                answerTable.put(row);
             }
         });
 
@@ -66,14 +62,15 @@ public class Repository {
         loadTable(openLocalResource("db/complect.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
-                ComplectRow row = new ComplectRow();
-                row.setDescription(textList[0]);
-                row.setId(Integer.parseInt(textList[1]));
-                row.setQuestionCount(Integer.parseInt(textList[2]));
-                row.setPassMark(Integer.parseInt(textList[3]));
-                row.setName(textList[4]);
-                row.setQuestionTime(Integer.parseInt(textList[5]));
-                complectTable.put(row.getId(), row);
+                complectTable.put(new ComplectRow(textList));
+            }
+        });
+
+        themeTable.clear();
+        loadTable(openLocalResource("db/themes.csv"), new HtmlTableLoader() {
+            @Override
+            public void accept(String[] textList) {
+                themeTable.put(new ThemeRow(textList));
             }
         });
 
@@ -81,13 +78,7 @@ public class Repository {
         loadTable(openLocalResource("db/quest.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
-                QuestRow row = new QuestRow();
-                row.setComplect(Integer.parseInt(textList[0]));
-                row.setId(Integer.parseInt(textList[1]));
-                row.setBilet(Integer.parseInt(textList[2]));
-                row.setQuestion(Integer.parseInt(textList[3]));
-                row.setQuestionText(textList[4]);
-                questTable.put(row.getId(), row);
+                questTable.put(new QuestRow(textList));
             }
         });
 
@@ -95,9 +86,7 @@ public class Repository {
         loadTable(openUserFile("settings.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
-                SettingRow row = new SettingRow();
-                row.parseCsv(textList);
-                userSettings.put(row.getId(), row);
+                userSettings.put(new SettingRow(textList));
             }
         });
     }
@@ -136,12 +125,16 @@ public class Repository {
         }
     }
 
-    public List<QuestRow> selectQuestList(List<Integer> complectIds) {
+    public List<QuestRow> selectQuestList(List<Integer> complectIds, List<Integer> themeIdList) {
         List<QuestRow> questList = new ArrayList<QuestRow>();
         for (QuestRow quest : questTable.values()) {
-            if (complectIds.contains(quest.getComplect())) {
-                questList.add(quest);
+            if (!complectIds.contains(quest.getComplect())) {
+                continue;
             }
+            if (!themeIdList.isEmpty() && !themeIdList.contains(quest.getTheme())) {
+                continue;
+            }
+            questList.add(quest);
         }
         return questList;
     }
