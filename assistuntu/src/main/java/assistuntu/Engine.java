@@ -26,6 +26,7 @@ public class Engine implements MainFormController {
     public void load() {
         try {
             repository.loadFromResources();
+            repository.loadUserTables();
         } catch (IOException e) {
             e.printStackTrace();
         }

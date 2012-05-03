@@ -15,6 +15,18 @@ public class Repository {
         void accept(String[] textList);
     }
 
+    private static interface HtmlTableSaver<T> {
+        String getCsvRow(T item);
+    }
+
+    private static interface TableInputStreamProvider {
+        InputStream getTableStream(String name) throws IOException;
+    }
+
+    private static interface TableOutputStreamProvider {
+        OutputStream getTableStream(String name) throws IOException;
+    }
+
     private static class IntegerHolder {
         public int val = 0;
     }
@@ -36,10 +48,64 @@ public class Repository {
         return questTable.get(quest);
     }
 
+    public DataTable<Integer, QuestRow> getQuestTable() {
+        return questTable;
+    }
+
+    public DataTable<Integer, ThemeRow> getThemeTable() {
+        return themeTable;
+    }
+
+    public void loadFromPath(final File repositoryDir) throws IOException {
+        loadFromStreams(new TableInputStreamProvider() {
+            @Override
+            public InputStream getTableStream(String name) throws IOException {
+                return new FileInputStream(new File(repositoryDir, name));
+            }
+        });
+    }
+
+    public void saveToFolder(final File repositoryDir) throws IOException {
+        saveToStreams(new TableOutputStreamProvider() {
+            @Override
+            public OutputStream getTableStream(String name) throws IOException {
+                return new FileOutputStream(new File(repositoryDir, name), false);
+            }
+        });
+    }
+
     public void loadFromResources() throws IOException {
+        loadFromStreams(new TableInputStreamProvider() {
+            @Override
+            public InputStream getTableStream(String name) {
+                return openLocalResource(name);
+            }
+        });
+    }
+
+    public void loadUserTables() throws IOException {
+        userSettings.clear();
+        loadTable(openUserFile("settings.csv"), new HtmlTableLoader() {
+            @Override
+            public void accept(String[] textList) {
+                userSettings.put(new SettingRow(textList));
+            }
+        });
+    }
+
+    private void saveToStreams(TableOutputStreamProvider streamProvider) throws IOException {
+        saveTable(streamProvider.getTableStream("db/quest.csv"), questTable.values(), new HtmlTableSaver<QuestRow>() {
+            @Override
+            public String getCsvRow(QuestRow item) {
+                return item.toCsv();
+            }
+        });
+    }
+
+    public void loadFromStreams(TableInputStreamProvider tableProvider) throws IOException {
         answerTable.clear();
         final IntegerHolder nextAnswerId = new IntegerHolder();
-        loadTable(openLocalResource("db/answers.csv"), new HtmlTableLoader() {
+        loadTable(tableProvider.getTableStream("db/answers.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
                 AnswerRow row = new AnswerRow(textList);
@@ -47,7 +113,7 @@ public class Repository {
                 nextAnswerId.val = Math.max(nextAnswerId.val, row.getId());
             }
         });
-        loadTable(openLocalResource("db/new_table.csv"), new HtmlTableLoader() {
+        loadTable(tableProvider.getTableStream("db/new_table.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
                 AnswerRow row = new AnswerRow(++nextAnswerId.val);
@@ -59,7 +125,7 @@ public class Repository {
         });
 
         complectTable.clear();
-        loadTable(openLocalResource("db/complect.csv"), new HtmlTableLoader() {
+        loadTable(tableProvider.getTableStream("db/complect.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
                 complectTable.put(new ComplectRow(textList));
@@ -67,7 +133,7 @@ public class Repository {
         });
 
         themeTable.clear();
-        loadTable(openLocalResource("db/themes.csv"), new HtmlTableLoader() {
+        loadTable(tableProvider.getTableStream("db/themes.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
                 themeTable.put(new ThemeRow(textList));
@@ -75,18 +141,10 @@ public class Repository {
         });
 
         questTable.clear();
-        loadTable(openLocalResource("db/quest.csv"), new HtmlTableLoader() {
+        loadTable(tableProvider.getTableStream("db/quest.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
                 questTable.put(new QuestRow(textList));
-            }
-        });
-
-        userSettings.clear();
-        loadTable(openUserFile("settings.csv"), new HtmlTableLoader() {
-            @Override
-            public void accept(String[] textList) {
-                userSettings.put(new SettingRow(textList));
             }
         });
     }
@@ -114,14 +172,35 @@ public class Repository {
         if (resource == null) {
             return;
         }
-        InputStreamReader reader = new InputStreamReader(resource, "utf-8");
-        BufferedReader scanner = new BufferedReader(reader);
-        String line = scanner.readLine();
+        try {
+            InputStreamReader reader = new InputStreamReader(resource, "utf-8");
+            BufferedReader scanner = new BufferedReader(reader);
+            String line = scanner.readLine();
 
-        Pattern splitter = Pattern.compile(";");
-        while (line != null) {
-            loader.accept(splitter.split(line));
-            line = scanner.readLine();
+            Pattern splitter = Pattern.compile(";");
+            while (line != null) {
+                loader.accept(splitter.split(line));
+                line = scanner.readLine();
+            }
+        } finally {
+            resource.close();
+        }
+    }
+
+    private <T> void saveTable(OutputStream out, Iterable<T> table, HtmlTableSaver<T> saver) throws IOException {
+        if (out == null) {
+            return;
+        }
+        try {
+            OutputStreamWriter output = new OutputStreamWriter(out, "utf-8");
+            BufferedWriter writer = new BufferedWriter(output);
+            for (T item : table) {
+                writer.append(saver.getCsvRow(item));
+                writer.newLine();
+            }
+            writer.flush();
+        } finally {
+            out.close();
         }
     }
 

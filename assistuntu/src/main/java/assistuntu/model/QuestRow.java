@@ -17,6 +17,10 @@ public class QuestRow implements Identible<Integer> {
         questionText = csvRow[5];
     }
 
+    public String toCsv() {
+        return String.format("%d;%d;%d;%d;%d;%s", complect, theme, id, bilet, question, questionText);
+    }
+
     @Override
     public Integer getId() {
         return id;
@@ -40,5 +44,9 @@ public class QuestRow implements Identible<Integer> {
 
     public int getTheme() {
         return theme;
+    }
+
+    public void setTheme(int theme) {
+        this.theme = theme;
     }
 }
