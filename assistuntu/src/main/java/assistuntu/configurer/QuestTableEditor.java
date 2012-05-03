@@ -7,8 +7,11 @@ import assistuntu.model.ThemeRow;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ public class QuestTableEditor extends JFrame {
 
     private File repositoryDir;
     private Repository repository;
+    private KeyAdapter tableKeyAdapter;
 
     public QuestTableEditor() {
         setContentPane(rootPane);
@@ -38,7 +42,14 @@ public class QuestTableEditor extends JFrame {
                 saveRepositoryFiles();
             }
         });
+        table.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                tableKeyAdapter.keyPressed(e);
+            }
+        });
     }
+
 
     private void loadRepository() {
         JFileChooser chooser = new JFileChooser();
@@ -61,7 +72,7 @@ public class QuestTableEditor extends JFrame {
 
         final List<ThemeRow> themeTable = new ArrayList<ThemeRow>(repository.getThemeTable().values());
         final List<QuestRow> data = new ArrayList<QuestRow>(repository.getQuestTable().values());
-        table.setModel(new AbstractTableModel() {
+        final TableModel tableModel = new AbstractTableModel() {
             @Override
             public int getRowCount() {
                 return data.size();
@@ -110,7 +121,8 @@ public class QuestTableEditor extends JFrame {
                     fireTableRowsUpdated(rowIndex, rowIndex);
                 }
             }
-        });
+        };
+        table.setModel(tableModel);
 
         for (ThemeRow row : themeTable) {
             TableColumn column = table.getColumn(Integer.toString(row.getId()));
@@ -119,6 +131,23 @@ public class QuestTableEditor extends JFrame {
             column.setMaxWidth(30);
             column.setWidth(30);
         }
+
+        tableKeyAdapter = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int value;
+                try {
+                    value = Integer.parseInt(e.getKeyChar() + "");
+                } catch (NumberFormatException nfe) {
+                    return;
+                }
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    return;
+                }
+                tableModel.setValueAt(true, row, value - 1);
+            }
+        };
     }
 
     private void saveRepositoryFiles() {
