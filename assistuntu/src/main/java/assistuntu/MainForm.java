@@ -1,9 +1,6 @@
 package assistuntu;
 
-import assistuntu.view.EngineListener;
-import assistuntu.view.MainFormController;
-import assistuntu.view.Question;
-import assistuntu.view.UserComplect;
+import assistuntu.view.*;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
@@ -30,6 +27,7 @@ public class MainForm extends JFrame implements EngineListener {
     private JPanel questionLine;
     private JScrollPane questionLinePane;
     private JButton btnShowAnswer;
+    private JTextPane themeLabel;
 
     private final MainFormController controller;
     private final List<JTextPane> answerButtons = new ArrayList<JTextPane>();
@@ -164,6 +162,11 @@ public class MainForm extends JFrame implements EngineListener {
         QuestionLabel label = getQuestionStatusLabel(question);
         label.setState(QuestionLabelState.SELECTED);
         label.scrollRectToVisible(label.getVisibleRect());
+
+        Complect complect = controller.getComplect(question.getComplect());
+        Theme theme = controller.getTheme(question.getTheme());
+        themeLabel.setEnabled(true);
+        themeLabel.setText(String.format("%s\r\n%s", complect.getName(), theme.getName()));
     }
 
     private QuestionLabel getQuestionStatusLabel(Question question) {

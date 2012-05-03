@@ -16,4 +16,8 @@ public interface MainFormController {
     Question currentQuestion();
 
     void setCurrentQuestionAnswer(boolean correct);
+
+    Theme getTheme(int id);
+
+    Complect getComplect(int id);
 }

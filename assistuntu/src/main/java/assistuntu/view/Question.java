@@ -11,6 +11,7 @@ public class Question {
     private final int id;
 
     private final int complect;
+    private final int theme;
     private final int bilet;
     private final int vopros;
 
@@ -27,6 +28,7 @@ public class Question {
     public Question(QuestRow questionRow) {
         this.id = questionRow.getId();
         this.complect = questionRow.getComplect();
+        this.theme = questionRow.getTheme();
         this.bilet = questionRow.getBilet();
         this.vopros = questionRow.getQuestion();
     }
@@ -121,5 +123,9 @@ public class Question {
 
     public int getVopros() {
         return vopros;
+    }
+
+    public int getTheme() {
+        return theme;
     }
 }

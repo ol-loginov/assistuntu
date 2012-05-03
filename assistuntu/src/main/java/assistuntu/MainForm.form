@@ -27,6 +27,13 @@
               <text value="Показать ответ"/>
             </properties>
           </component>
+          <component id="a7dbf" class="javax.swing.JTextPane" binding="themeLabel">
+            <constraints/>
+            <properties>
+              <editable value="false"/>
+              <enabled value="false"/>
+            </properties>
+          </component>
         </children>
       </toolbar>
       <grid id="72400" binding="questionPanel" layout-manager="BorderLayout" hgap="0" vgap="0">

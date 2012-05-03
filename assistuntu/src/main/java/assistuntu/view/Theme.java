@@ -1,9 +1,19 @@
 package assistuntu.view;
 
+import assistuntu.model.ThemeRow;
+
 public class Theme {
     private int id;
     private String name;
     private boolean selected;
+
+    public Theme() {
+    }
+
+    public Theme(ThemeRow row) {
+        id = row.getId();
+        name = row.getName();
+    }
 
     public int getId() {
         return id;

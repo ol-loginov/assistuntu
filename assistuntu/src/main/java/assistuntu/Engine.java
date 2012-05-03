@@ -171,4 +171,19 @@ public class Engine implements MainFormController {
     public int getQuestionListSize() {
         return questionList.size();
     }
+
+    @Override
+    public Theme getTheme(int id) {
+        return new Theme(repository.getThemeTable().get(id));
+    }
+
+    @Override
+    public Complect getComplect(int id) {
+        for (Complect complect : userComplect.getComplects()) {
+            if (id == complect.getId()) {
+                return complect;
+            }
+        }
+        throw new IllegalArgumentException("complect not found");
+    }
 }
