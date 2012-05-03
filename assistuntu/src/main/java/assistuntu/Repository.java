@@ -5,9 +5,7 @@ import assistuntu.model.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Repository {
@@ -104,22 +102,39 @@ public class Repository {
 
     public void loadFromStreams(TableInputStreamProvider tableProvider) throws IOException {
         answerTable.clear();
-        final IntegerHolder nextAnswerId = new IntegerHolder();
+        final Map<Integer, List<AnswerRow>> questToAnswerMap = new HashMap<Integer, List<AnswerRow>>();
+        loadTable(tableProvider.getTableStream("db/new_table.csv"), new HtmlTableLoader() {
+            @Override
+            public void accept(String[] textList) {
+                AnswerRow row = new AnswerRow(0);
+                row.setQuest(Integer.parseInt(textList[1]));
+                row.setAnswer(textList[2]);
+                row.setCorrect("1".equals(textList[3]));
+                //store answer to get it later in parsing "db/answers.csv"
+                List<AnswerRow> rows = questToAnswerMap.get(row.getQuest());
+                if (rows == null) {
+                    rows = new ArrayList<AnswerRow>();
+                    questToAnswerMap.put(row.getQuest(), rows);
+                }
+                rows.add(row);
+            }
+        });
         loadTable(tableProvider.getTableStream("db/answers.csv"), new HtmlTableLoader() {
             @Override
             public void accept(String[] textList) {
                 AnswerRow row = new AnswerRow(textList);
-                answerTable.put(row);
-                nextAnswerId.val = Math.max(nextAnswerId.val, row.getId());
-            }
-        });
-        loadTable(tableProvider.getTableStream("db/new_table.csv"), new HtmlTableLoader() {
-            @Override
-            public void accept(String[] textList) {
-                AnswerRow row = new AnswerRow(++nextAnswerId.val);
-                row.setQuest(Integer.parseInt(textList[1]));
-                row.setAnswer(textList[2]);
-                row.setCorrect("1".equals(textList[3]));
+
+                // if we had loaded the answer from "new_table.csv" - then use it
+                List<AnswerRow> rows = questToAnswerMap.get(row.getQuest());
+                if (rows != null && !rows.isEmpty()) {
+                    AnswerRow newTableAnswer = rows.remove(0);
+                    newTableAnswer.setId(row.getId());
+                    row = newTableAnswer;
+                    if (rows.isEmpty()) {
+                        questToAnswerMap.remove(row.getQuest());
+                    }
+                }
+
                 answerTable.put(row);
             }
         });

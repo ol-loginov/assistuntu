@@ -152,10 +152,9 @@ public class Engine implements MainFormController {
 
     private void setCurrentQuestion(Question q) {
         question = q;
-        if (question == null) {
-            return;
+        if (question != null) {
+            loadQuestion(question);
         }
-        loadQuestion(question);
         listener.questionTaken(question);
     }
 

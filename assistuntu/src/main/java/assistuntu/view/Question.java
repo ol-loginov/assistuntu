@@ -69,7 +69,11 @@ public class Question {
         if (correct) {
             setAnswer(answer);
         } else {
-            variants[variantsSize++] = answer;
+            try {
+                variants[variantsSize++] = answer;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                variants[variantsSize] = "";
+            }
         }
     }
 
