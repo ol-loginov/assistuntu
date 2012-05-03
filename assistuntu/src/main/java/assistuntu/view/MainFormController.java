@@ -13,6 +13,8 @@ public interface MainFormController {
 
     void nextQuestion();
 
+    void selectQuestion(int id);
+
     Question currentQuestion();
 
     void setCurrentQuestionAnswer(boolean correct);

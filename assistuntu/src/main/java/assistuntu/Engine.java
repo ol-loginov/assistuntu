@@ -147,10 +147,31 @@ public class Engine implements MainFormController {
             refillQueue();
         }
 
+        setCurrentQuestion(questionLine.isEmpty() ? null : questionLine.remove(0));
+    }
 
-        question = questionLine.isEmpty() ? null : questionLine.remove(0);
+    private void setCurrentQuestion(Question q) {
+        question = q;
+        if (question == null) {
+            return;
+        }
         loadQuestion(question);
         listener.questionTaken(question);
+    }
+
+    @Override
+    public void selectQuestion(int id) {
+        Question question = null;
+        for (Question q : questionList) {
+            if (q.getId() == id) {
+                question = q;
+            }
+        }
+        if (question == null) {
+            return;
+        }
+        questionLine.remove(question);
+        setCurrentQuestion(question);
     }
 
     private void loadQuestion(Question question) {

@@ -7,6 +7,7 @@ import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
@@ -163,9 +164,21 @@ public class MainForm extends JFrame implements EngineListener {
 
         int questionListSize = controller.getQuestionListSize();
         questionStatus.setText(String.format("%d из %d", question.getIndex() + 1, questionListSize));
-        QuestionLabel label = getQuestionStatusLabel(question);
-        label.setState(QuestionLabelState.SELECTED);
-        label.scrollRectToVisible(label.getVisibleRect());
+
+        QuestionLabel questionLabel = null;
+        for (Component component : questionLine.getComponents()) {
+            QuestionLabel label = (QuestionLabel) component;
+            if (label.getId() == question.getId()) {
+                label.setState(QuestionLabelState.SELECTED);
+                questionLabel = label;
+            } else {
+                label.setState(QuestionLabelState.UNSELECTED);
+            }
+        }
+
+        if (questionLabel != null) {
+            questionLabel.scrollRectToVisible(questionLabel.getVisibleRect());
+        }
 
         Complect complect = controller.getComplect(question.getComplect());
         Theme theme = controller.getTheme(question.getTheme());
@@ -183,34 +196,49 @@ public class MainForm extends JFrame implements EngineListener {
     }
 
     public static enum QuestionLabelState {
+        UNSELECTED,
         SELECTED,
         FAILED,
         PASSED
     }
 
-    public static class QuestionLabel extends JLabel {
+    public class QuestionLabel extends JLabel {
         private final int id;
+        private QuestionLabelState state = null;
+        private Color unselectedBackground;
 
         public QuestionLabel(Question q) {
             this.id = q.getId();
             setText(String.format("%d:%d:%d", q.getComplect(), q.getBilet(), q.getVopros()));
             setOpaque(true);
-            changeBackground(getBackground());
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            changeBackground(unselectedBackground = getBackground());
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    MainForm.this.controller.selectQuestion(getId());
+                }
+            });
         }
 
         public int getId() {
             return id;
         }
 
-        public void setState(QuestionLabelState state) {
-            switch (state) {
+        public void setState(QuestionLabelState newState) {
+            switch (newState) {
                 case SELECTED:
                     changeBackground(Color.YELLOW);
                     break;
+                case UNSELECTED:
+                    changeBackground(state == null ? unselectedBackground : state == QuestionLabelState.FAILED ? Color.RED : Color.GREEN);
+                    break;
                 case FAILED:
+                    this.state = newState;
                     changeBackground(Color.RED);
                     break;
                 case PASSED:
+                    this.state = newState;
                     changeBackground(Color.GREEN);
                     break;
             }
