@@ -4,10 +4,7 @@ import assistuntu.model.*;
 import assistuntu.view.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Engine implements MainFormController {
     private final Random random = new Random(System.currentTimeMillis());
@@ -119,7 +116,12 @@ public class Engine implements MainFormController {
             e.printStackTrace();
         }
 
-        List<QuestRow> questInput = repository.selectQuestList(complectIdList, themeIdList);
+        Map<String, QuestRow> questInputMap = new TreeMap<String, QuestRow>();
+        for (QuestRow q : repository.selectQuestList(complectIdList, themeIdList)) {
+            questInputMap.put(q.getQuestionText(), q);
+        }
+
+        List<QuestRow> questInput = new ArrayList<QuestRow>(questInputMap.values());
         Collections.shuffle(questInput);
 
         questionList.clear();
