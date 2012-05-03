@@ -43,6 +43,45 @@
                     <failOnError>true</failOnError>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>target/${project.build.finalName}.exe</outfile>
+                            <jar>target/${project.build.finalName}.jar</jar>
+                            <errTitle>encc</errTitle>
+                            <classPath>
+                                <mainClass>assistuntu.App</mainClass>
+                                <addDependencies>false</addDependencies>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <jre>
+                                <minVersion>1.5.0</minVersion>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>1.0.0.0</fileVersion>
+                                <txtFileVersion>no version</txtFileVersion>
+                                <fileDescription>description</fileDescription>
+                                <copyright>NO WARRANTY</copyright>
+                                <productVersion>1.0.0.0</productVersion>
+                                <txtProductVersion>txt product version</txtProductVersion>
+                                <productName>assistuntu</productName>
+                                <internalName>assistuntu</internalName>
+                                <originalFilename>assistuntu.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
