@@ -1,9 +1,6 @@
 package assistuntu;
 
-import assistuntu.model.AnswerRow;
-import assistuntu.model.ComplectRow;
-import assistuntu.model.QuestRow;
-import assistuntu.model.SettingRow;
+import assistuntu.model.*;
 import assistuntu.view.*;
 
 import java.io.IOException;
@@ -48,6 +45,22 @@ public class Engine implements MainFormController {
             userComplect.getComplects().add(complect);
         }
 
+        List<Integer> activeTheme = new ArrayList<Integer>();
+        for (SettingRow row : repository.getUserSettings().values()) {
+            if (row.getId().startsWith("active.theme.")) {
+                activeTheme.add(Integer.parseInt(row.getValue()));
+            }
+        }
+
+        userComplect.getThemes().clear();
+        for (ThemeRow row : repository.getThemeTable().values()) {
+            Theme theme = new Theme();
+            theme.setId(row.getId());
+            theme.setName(row.getName());
+            theme.setSelected(activeTheme.contains(row.getId()));
+            userComplect.getThemes().add(theme);
+        }
+
         setUserComplect(userComplect);
     }
 
@@ -71,6 +84,9 @@ public class Engine implements MainFormController {
 
         for (String setting : repository.getUserSettings().keys().toArray(new String[0])) {
             if (setting.startsWith("active.complect.")) {
+                repository.getUserSettings().remove(setting);
+            }
+            if (setting.startsWith("active.theme.")) {
                 repository.getUserSettings().remove(setting);
             }
         }
@@ -129,7 +145,8 @@ public class Engine implements MainFormController {
             refillQueue();
         }
 
-        question = questionLine.remove(0);
+
+        question = questionLine.isEmpty() ? null : questionLine.remove(0);
         loadQuestion(question);
         listener.questionTaken(question);
     }

@@ -27,7 +27,7 @@ public class MainForm extends JFrame implements EngineListener {
     private JPanel questionLine;
     private JScrollPane questionLinePane;
     private JButton btnShowAnswer;
-    private JTextPane themeLabel;
+    private JLabel questionTheme;
 
     private final MainFormController controller;
     private final List<JTextPane> answerButtons = new ArrayList<JTextPane>();
@@ -157,6 +157,10 @@ public class MainForm extends JFrame implements EngineListener {
     public void questionTaken(Question question) {
         showQuestion(question);
 
+        if (question == null) {
+            return;
+        }
+
         int questionListSize = controller.getQuestionListSize();
         questionStatus.setText(String.format("%d из %d", question.getIndex() + 1, questionListSize));
         QuestionLabel label = getQuestionStatusLabel(question);
@@ -165,8 +169,7 @@ public class MainForm extends JFrame implements EngineListener {
 
         Complect complect = controller.getComplect(question.getComplect());
         Theme theme = controller.getTheme(question.getTheme());
-        themeLabel.setEnabled(true);
-        themeLabel.setText(String.format("%s\r\n%s", complect.getName(), theme.getName()));
+        questionTheme.setText(String.format("%s / %s", complect.getName(), theme.getName()));
     }
 
     private QuestionLabel getQuestionStatusLabel(Question question) {

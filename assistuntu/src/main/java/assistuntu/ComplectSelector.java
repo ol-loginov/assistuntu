@@ -114,14 +114,14 @@ public class ComplectSelector extends JDialog {
             }
         });
 
-        TableColumn column = complectTable.getColumn("Включить");
+        TableColumn column = themeTable.getColumn("Включить");
         column.setResizable(false);
         column.setPreferredWidth(30);
         column.setMaxWidth(30);
         column.setWidth(30);
 
-        complectTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-        complectTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        themeTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        themeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     private void setComplectTable(final List<Complect> values) {
